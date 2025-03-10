@@ -9,27 +9,26 @@ import serial
 import struct
 import time
 
-CMD_HEAD = 0xabcd
-CMD_LENGTH = 28
-DATA_HEAD = [0xba, 0xdc]
-DATA_LENGTH = 68
+CMD_HEAD = 0xabcd  # Command header
+CMD_LENGTH = 28  # Command length
+DATA_HEAD = [0xba, 0xdc]  # Data header
+DATA_LENGTH = 68  # Data length
 
-CMD_OBS_ONLY = 0  # 只观测数据
-CMD_INNER_DUAL_LEG_MODE = 11  # 内部算法，可对Force、Speed调参
-CMD_SERVO_OVERRIDE = 200  # 直接控制伺服电机
-CMD_SHUTDOWN = 250  # 关机
+CMD_OBS_ONLY = 0  # Observe data only
+CMD_INNER_DUAL_LEG_MODE = 11  # Internal algorithm mode, can adjust Force and Speed
+CMD_SERVO_OVERRIDE = 200  # Directly control the servo motor
+CMD_SHUTDOWN = 250  # Shutdown
 
+TOR_LOOP = 1  # Torque control mode
+TOR_MAX_VALUE = 15  # Maximum torque: 15Nm
 
-TOR_LOOP = 1  # 关节力矩控制
-TOR_MAX_VALUE = 15  # 最大力矩15Nm
+SPEED_LOOP = 2  # Speed control mode
+SPEED_MAX_VALUE = 12  # Maximum speed: 12rad/s
 
-SPEED_LOOP = 2  # 关节速度控制
-SPEED_MAX_VALUE = 12  # 最大速度12rad/s
+PLACE_LOOP = 3  # Position control mode, 0° is the lower limit
+PLACE_MAX_VALUE = 2.62  # Maximum joint position: 150°
 
-PLACE_LOOP = 3  # 关节位置控制，后限位为0°
-PLACE_MAX_VALUE = 2.62  # 最大关节位置150°
-
-ANGLE_OFFSET = -0.61  # 站直时，髋关节在35°
+ANGLE_OFFSET = -0.61  # When standing, the hip joint is at 35°
 
 
 def GetSec():
@@ -48,11 +47,11 @@ class CmdStruct(object):
     def __init__(self):
         self.CmdCnt = 0
         self.CmdGapMs = 10
-        self.CmdMode = CMD_OBS_ONLY  # CMD_OBS_ONLY 、CMD_INNER_DUAL_LEG_MODE、CMD_SERVO_OVERRIDE、CMD_SHUTDOWN
-        self.ForceValue = 0  # CMD_INNER_DUAL_LEG_MODE模式生效，值发生变化且不大于20才会使用
-        self.SpeedValue = 0  # CMD_INNER_DUAL_LEG_MODE模式生效，值发生变化且不大于20才会使用
+        self.CmdMode = CMD_OBS_ONLY  # CMD_OBS_ONLY, CMD_INNER_DUAL_LEG_MODE, CMD_SERVO_OVERRIDE, CMD_SHUTDOWN
+        self.ForceValue = 0  # Effective in CMD_INNER_DUAL_LEG_MODE, the value must change and not exceed 20
+        self.SpeedValue = 0  # Effective in CMD_INNER_DUAL_LEG_MODE, the value must change and not exceed 20
 
-        self.Loop_L = 0  # CMD_SERVO_OVERRIDE模式生效，支持TOR_LOOP、SPEED_LOOP、PLACE_LOOP三种环
+        self.Loop_L = 0  # Effective in CMD_SERVO_OVERRIDE mode, supports TOR_LOOP, SPEED_LOOP, PLACE_LOOP
         self.Loop_R = 0
         self.Value_L = 0
         self.Value_R = 0
@@ -60,16 +59,16 @@ class CmdStruct(object):
 
 class DataStruct(object):
     def __init__(self):
-        self.PowerKeyState = 0  # Key value: 0 means released, 1 means pressed.
+        self.PowerKeyState = 0  # Key state: 0 means released, 1 means pressed
         self.FuncKeyState = 0
         self.UpKeyState = 0
         self.DownKeyState = 0
 
-        self.DeviceError = 0  # Device status: 1 means abnormal.
-        self.Battery = 0   # Battery Percentage
-        self.DeviceMs = 0  # Milliseconds allowed after startup.
+        self.DeviceError = 0  # Device status: 1 means abnormal
+        self.Battery = 0  # Battery percentage
+        self.DeviceMs = 0  # Milliseconds after startup
 
-        self.BackIncl = 0.0  	 	  # Back tilt angle.
+        self.BackIncl = 0.0  # Back tilt angle
         self.HipAngle_L = 0.0
         self.HipAngle_R = 0.0
         self.HipSpeed_L = 0.0
@@ -112,7 +111,7 @@ class AntCH(object):
             if self.ComState == 1:
                 self.__s.read_all()
             else:
-                print('Connect Fail， Device No Response')
+                print('Connect Fail, Device No Response')
                 self.ComState = 1
                 self.__CloseSerial()
         except Exception as e:
@@ -154,7 +153,7 @@ class AntCH(object):
             print('Serial Close Fail')
 
     def __U16XorCheck(self, Data):
-        # 按16位异或校验
+        # XOR check for 16-bit data
         Check1 = 0
         Check2 = 0
         if len(Data) % 2 == 0:
@@ -171,20 +170,20 @@ class AntCH(object):
         Fix_Value = Value
 
         if Fix_Loop == TOR_LOOP:
-            # 力矩限幅
+            # Torque limit
             if Fix_Value > TOR_MAX_VALUE:
                 Fix_Value = TOR_MAX_VALUE
             elif Fix_Value < -TOR_MAX_VALUE:
                 Fix_Value = -TOR_MAX_VALUE
 
         elif Fix_Loop == SPEED_LOOP:
-            # 力矩限幅
+            # Speed limit
             if Fix_Value > SPEED_MAX_VALUE:
                 Fix_Value = SPEED_MAX_VALUE
             elif Fix_Value < -SPEED_MAX_VALUE:
                 Fix_Value = -SPEED_MAX_VALUE
         elif Fix_Loop == PLACE_LOOP:
-            # 位置限幅
+            # Position limit
             if Fix_Value > PLACE_MAX_VALUE:
                 Fix_Value = PLACE_MAX_VALUE
             elif Fix_Value < 0:
@@ -203,33 +202,32 @@ class AntCH(object):
 
     def __PackCmd(self):
         try:
-            # 数据防错
+            # Data error correction
             self.Cmd.Loop_L, self.Cmd.Value_L = self.__CmdCheck(self.Cmd.Loop_L, self.Cmd.Value_L)
             self.Cmd.Loop_R, self.Cmd.Value_R = self.__CmdCheck(self.Cmd.Loop_R, self.Cmd.Value_R)
-            # 封装数据
+            # Pack the data
             self.Cmd.CmdGapMs = int(min(250, self.Ctrldt * 1000))
             Data = struct.pack('<H16B2f', CMD_HEAD, self.Cmd.CmdMode, self.Cmd.CmdCnt, self.Cmd.CmdGapMs, self.Cmd.ForceValue, self.Cmd.SpeedValue, 0, 0, 0, 0, 0, 0, 0, 0, 0, self.Cmd.Loop_L, self.Cmd.Loop_R, self.Cmd.Value_L, self.Cmd.Value_R)
         except (Exception):
             print('Cmd Error')
             Data = struct.pack('<H3d', CMD_HEAD, 0, 0, 0)
 
-        # print('Send: ', str(Head).encode('utf-8'))
         return Data + self.__U16XorCheck(Data)
 
     def __UnPackData(self, Data):
         UnpackState = 0
         if (len(Data) == DATA_LENGTH) and (Data[0] == DATA_HEAD[0]) and (Data[1] == DATA_HEAD[1]):
-            # 包头及长度校验通过
+            # Check header and length
             Check = self.__U16XorCheck(Data[:-2])
             if (Check[0] == Data[-2]) and (Check[1] == Data[-1]):
-                # 解包数据
+                # Unpack data
                 [
                     self.Data.PowerKeyState, self.Data.FuncKeyState, self.Data.UpKeyState, self.Data.DownKeyState, self.Data.DeviceError, self.Data.Battery, Nouse0, NoUse1, Nouse2, Nouse3, Nouse4, Nouse5, Nouse6, Nouse7, Nouse8, Nouse9,
                     self.Data.DeviceMs, self.Data.BackIncl, self.Data.HipAngle_L, self.Data.HipAngle_R, self.Data.HipSpeed_L, self.Data.HipSpeed_R, self.Data.HipTor_L, self.Data.HipTor_R, self.Data.Voltage, self.Data.Current, self.Data.AccX,
                     self.Data.AccY, self.Data.AccZ, self.Data.GyroX, self.Data.GyroY, self.Data.GyroZ
                 ] = struct.unpack('<16BI7f2H6h', Data[2:-2])
 
-                # 数据幅值修正
+                # Correct data magnitudes
                 self.Data.Voltage *= 0.01
                 self.Data.Current *= 0.01
                 self.Data.AccX *= 0.01
@@ -239,10 +237,10 @@ class AntCH(object):
                 self.Data.GyroY *= 0.01
                 self.Data.GyroZ *= 0.01
 
-                # 通过时间判断设备数据刷新了
+                # Check if data has been refreshed
                 if self.__LastDeviceMs != self.Data.DeviceMs:
                     self.__LastDeviceMs = self.Data.DeviceMs
-                    # 告知设备指令刷新
+                    # Notify the device of command refresh
                     if self.Cmd.CmdCnt > 250:
                         self.Cmd.CmdCnt = 0
                     else:
