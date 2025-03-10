@@ -1,8 +1,8 @@
 # exoskeleton-prosthetic
-## Exoskeleton prosthetic for  BME 198 Senior Design Project 
+### Exoskeleton prosthetic for  BME 198 Senior Design Project 
 
 
-### Files
+## Files
 kqExoskeletonIO: Device communication protocol file
 
 Sample: Example to make the device's leg rods swing crosswise. Ensure there is enough space for the device's legs to move before running.
