@@ -3,15 +3,13 @@
 """
 Created on Mon Apr 19 15:28:47 2021
 
-@author: lzr
-@author: Gerardo R Padilla Jr. 
+@author: Gerardo R Padilla Jr.
+
 """
 
 import kqExoskeletonIO as kqio
 import datetime
 import csv
-
-
 
 GetSec = kqio.GetSec
 Ant = kqio.AntCH('com3')  # "/dev/ttyAMA0"
@@ -34,7 +32,6 @@ AntConnected = (Ant.ComState == 1)
 
 
 TOTAL_TIME = 15
-
 
 with open(FileName, "w", newline="") as f:
     writer = csv.writer(f)
