@@ -14,8 +14,9 @@ np.random.seed(42)
 x_data = np.linspace(0, 10, 100)  # X values
 A_true, B_true, C_true, D_true = 5, 2 * np.pi / 3, 0.5, 3  # True parameters
 y_data = true_sinusoidal(x_data, A_true, B_true, C_true, D_true) + np.random.normal(
-    0, 0.5, len(x_data)
+    0.0, 1, len(x_data)
 )
+print(type(x_data))
 
 # **Step 1: Estimate Frequency Using FFT**
 N = len(x_data)
@@ -66,6 +67,7 @@ plt.plot(
     label="Fitted Function",
     color="blue",
 )
+
 plt.legend()
 plt.xlabel("x")
 plt.ylabel("y")
