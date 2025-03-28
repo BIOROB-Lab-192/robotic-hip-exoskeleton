@@ -12,7 +12,8 @@ import datetime
 import csv
 import logging
 
-logger = logging.basicConfig(filename="log/data_record.csv", level=logging.INFO)
+logging.basicConfig(filename="log/data_record.csv", level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def record_to_csv(testname="", total_time=5, port="com3"):
@@ -23,7 +24,7 @@ def record_to_csv(testname="", total_time=5, port="com3"):
     # 观测数据
     ComTotalCnt = 1
     ComErrorCnt = 0
-    PlotLength = 1000
+    # PlotLength = 1000
     if testname == "":
         testname = input("Enter Test Name: ")
         testname = "data/" + testname
@@ -132,3 +133,7 @@ def record_to_csv(testname="", total_time=5, port="com3"):
                 "Run Time:%.3fs" % (UpdateSec - StartSec),
                 "  Update Time:%.3fs" % Ant.Ctrldt,
             )
+
+
+if __name__ == "__main__":
+    record_to_csv()

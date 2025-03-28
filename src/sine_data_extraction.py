@@ -77,7 +77,7 @@ def plot_sine_estimation(x_data, y_data, sine_curve_params):
     plt.show()
 
 
-if "__name__" == "main":
+if __name__ == "__main__":
     columns_to_extract = ["Time", "HipTor_L"]
     with open("data/Collin_treadwalk_2_AntData_2025_03_06_15_41.csv", "r") as file:
         reader = csv.DictReader(file)

@@ -151,7 +151,7 @@ def recording_finished():
 def check_exoskeleton_connection():
     global exoskeleton_port_name
     try:
-        result = fp.is_exoskeleton_conected()
+        result = fp.is_exoskeleton_connected()
         if result:
             exoskeleton_port_name = result
             connected_label.config(text="Exoskeleton Connected")
@@ -174,6 +174,8 @@ def on_start():
     if start_button["state"] == "disabled":
         messagebox.showerror("Invalid Input", status_label["text"])
         return
+
+    check_exoskeleton_connection()
     if not exoskeleton_port_name:
         messagebox.showerror(
             "Exoskeleton Not Connected", "No exoskeleton port available."
