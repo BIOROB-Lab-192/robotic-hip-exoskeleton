@@ -2,6 +2,7 @@ import serial.tools.list_ports
 
 
 def is_exoskeleton_conected():
+    # if
     return "com3"
 
 

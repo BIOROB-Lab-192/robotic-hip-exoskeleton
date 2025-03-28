@@ -12,7 +12,7 @@ import datetime
 import csv
 import logging
 
-logger = logging.basicConfig(filename="log/data_record.txt", level=logging.INFO)
+logger = logging.basicConfig(filename="log/data_record.csv", level=logging.INFO)
 
 
 def record_to_csv(testname="", total_time=5, port="com3"):
