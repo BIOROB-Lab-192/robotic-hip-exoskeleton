@@ -15,7 +15,7 @@ countdown_seconds = 0
 
 # ───────────── Load Patient Names ─────────────
 def load_patient_names():
-    filename = "data/patient_info.xlsx"
+    filename = "data/patient_info.csv"
     if not os.path.exists(filename):
         return []
 
@@ -45,7 +45,7 @@ def load_patient_names():
             names.append(full_name)
         return names
     except Exception as e:
-        print("Error loading patient_info.xlsx:", e)
+        print("Error loading patient_info.csv:", e)
         return []
 
 
@@ -211,7 +211,10 @@ def on_start():
 
     def record_task():
         try:
-            DR.record_to_csv(testname=testname, total_time=total_time, port=port)
+            print(directory_var.get)
+            DR.record_to_csv(
+                testname=directory_var + testname, total_time=total_time, port=port
+            )
         except Exception as e:
             root.after(0, lambda: messagebox.showerror("Exoskeleton Error", f"{e}"))
         finally:

@@ -12,7 +12,7 @@ import datetime
 import csv
 import logging
 
-logging.basicConfig(filename="log/data_record.csv", level=logging.INFO)
+logging.basicConfig(filename="log/Data_Record.log", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
