@@ -1,5 +1,5 @@
 # exoskeleton-prosthetic
-### Exoskeleton prosthetic for  BME 198 Senior Design Project 
+### Exoskeleton prosthetic for  BME 198 Senior Design Project With User Interface
 
 
 ## Files
@@ -12,3 +12,6 @@ Sample_GUI: Runs on a PC, with the same functionality as Sample but adds a graph
 Data_Record: Records sensor data from the device and writes it to a CSV file.
 
 Note: Since Windows is a non-real-time operating system, the communication frequency will be lower when running the script on Windows compared to Linux.
+
+
+## How to Setup 
