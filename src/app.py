@@ -6,14 +6,13 @@ import os
 import threading
 import time
 import find_ports as fp
-import Data_Record as DR  # Your recording method
+import Data_Record as DR  # Recording method
 
-# ───────────── Global Variables ─────────────
+
 exoskeleton_port_name = None
 countdown_seconds = 0
 
 
-# ───────────── Load Patient Names ─────────────
 def load_patient_names():
     filename = "data/patient_info.csv"
     if not os.path.exists(filename):
