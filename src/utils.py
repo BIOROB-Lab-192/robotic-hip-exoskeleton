@@ -36,50 +36,42 @@ def ensure_data_files():
 
 def get_next_patient_id():
     ensure_data_files()
-    try:
-        df = pd.read_csv(INFO_FILE)
-        return int(df["Patient_ID"].max()) + 1 if not df.empty else 1
-    except:
-        return 1
+    df = pd.read_csv(INFO_FILE, dtype={"Phone": str, "Patient_ID": str})
+    return int(df["Patient_ID"].max() + 1) if not df.empty else 1
 
 
 def load_patient_names():
     ensure_data_files()
-    try:
-        df = pd.read_csv(INFO_FILE)
-        names = []
-        for _, row in df.iterrows():
-            first = str(row["First Name"]).strip().title()
-            middle = (
-                str(row["Middle Name"]).strip()
-                if not pd.isna(row["Middle Name"])
-                else ""
-            )
-            last = str(row["Last Name"]).strip().title()
-            if not first or not last:
-                continue
-            name = f"{first} {middle[0] + '.' if middle else ''} {last}"
-            names.append(name)
-        return names
-    except:
-        return []
+    df = pd.read_csv(INFO_FILE, dtype={"Phone": str, "Patient_ID": str})
+    names = []
+    for _, row in df.iterrows():
+
+        first = str(row.get("First Name", "")).strip().title()
+        middle = row.get("Middle Name", "")
+        if isinstance(middle, str) and middle.strip():
+            middle_initial = f"{middle.strip()[0]}."
+        else:
+            middle_initial = ""
+        last = str(row.get("Last Name", "")).strip().title()
+        if not first or not last:
+            continue
+
+        if middle_initial == "":
+            name = f"{row.get('First Name', '')} {row.get('Last Name', '')}".strip()
+        else:
+            name = f"{row.get('First Name', '')} {middle_initial} {row.get('Last Name', '')}".strip()
+
+        names.append(name)
+    return names
 
 
 def load_patient_dataframe():
-    if os.path.exists(INFO_FILE):
-        return pd.read_csv(INFO_FILE)
-    else:
-        return pd.DataFrame(
-            columns=[
-                "Patient_ID",
-                "First Name",
-                "Middle Name",
-                "Last Name",
-                "Phone",
-                "email",
-            ]
-        )
+    ensure_data_files()
+    info_df = pd.read_csv(INFO_FILE, dtype={"Phone": str, "Patient_ID": str})
+    data_df = pd.read_csv(DATA_FILE, dtype={"Patient_ID": str})
+    return info_df, data_df
 
 
-def save_patient_dataframe(df):
-    df.to_csv(INFO_FILE, index=False)
+def save_patient_dataframe(info_df, data_df):
+    info_df.to_csv(INFO_FILE, index=False)
+    data_df.to_csv(DATA_FILE, index=False)

@@ -1,69 +1,125 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import pandas as pd
-import os
 from utils import load_patient_dataframe, save_patient_dataframe
+
 
 class ViewPatientsPage(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        self["style"] = "Blue.TFrame"
 
-        style = ttk.Style()
-        style.theme_use("clam")
-        self.font_style = ("Helvetica", 14)
-        style.configure("Blue.TFrame", background="#0055A2")
-        style.configure("Header.TLabel", background="#0055A2", foreground="white", font=("Helvetica", 20, "bold"))
-        style.configure("Gray.TButton", background="#A7A8AA", font=self.font_style, padding=10)
-        style.map("Gray.TButton", background=[("active", "#8e8f90")])
+        self.configure(style="Blue.TFrame")
+        title = ttk.Label(
+            self, text="All Patients", font=("Helvetica", 20), style="Blue.TLabel"
+        )
+        title.pack(pady=10)
 
-        ttk.Label(self, text="All Patients", style="Header.TLabel").pack(pady=10)
+        self.tree = ttk.Treeview(
+            self,
+            columns=("Patient_Name", "Gender", "Date of Birth", "Phone", "Email"),
+            show="headings",
+        )
 
-        # Treeview
-        self.tree = ttk.Treeview(self, columns=("ID", "First", "Middle", "Last", "Phone", "Email"), show="headings")
-        for col in self.tree["columns"]:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, width=120, anchor="center")
-        self.tree.pack(fill="both", expand=True, padx=10, pady=10)
+        self.tree.heading("Patient_Name", text="Patient Name")
+        self.tree.heading("Gender", text="Gender")
+        self.tree.heading("Date of Birth", text="Date of Birth")
+        self.tree.heading("Phone", text="Phone")
+        self.tree.heading("Email", text="Email")
+        self.tree.tag_configure("even", background="#E8E8E8")
+        self.tree.tag_configure("odd", background="#FFFFFF")
+        self.tree.pack(fill="both", expand=True, padx=20, pady=10)
 
-        # Buttons
         btn_frame = ttk.Frame(self, style="Blue.TFrame")
         btn_frame.pack(pady=10)
 
-        ttk.Button(btn_frame, text="Delete Selected", style="Gray.TButton", command=self.delete_selected).pack(side="left", padx=10)
-        ttk.Button(btn_frame, text="Back", style="Gray.TButton", command=lambda: controller.show_frame("MainMenu")).pack(side="left", padx=10)
+        ttk.Button(
+            btn_frame, text="Delete Selected", command=self.delete_selected
+        ).pack(side="left", padx=10)
+        ttk.Button(
+            btn_frame, text="Back", command=lambda: controller.show_frame("MainMenu")
+        ).pack(side="left", padx=10)
 
-        self.load_data()
+    def on_show(self):
+        self.populate_treeview()
 
-    def load_data(self):
-        df = load_patient_dataframe()
+    def populate_treeview(self):
         self.tree.delete(*self.tree.get_children())
-        for _, row in df.iterrows():
-            self.tree.insert("", "end", values=(
-                row.get("Patient_ID", ""),
-                row.get("First Name", ""),
-                row.get("Middle Name", ""),
-                row.get("Last Name", ""),
-                row.get("Phone", ""),
-                row.get("email", "")
-            ))
+        info_df, data_df = load_patient_dataframe()
 
-    def delete_selected(self):
-        selected_item = self.tree.selection()
-        if not selected_item:
-            messagebox.showinfo("No Selection", "Please select a patient to delete.")
+        print(info_df)
+        if info_df.empty:
             return
 
-        confirm = messagebox.askyesno("Confirm", "Are you sure you want to delete the selected patient?")
+        for (_, info_row), (_, data_row) in zip(info_df.iterrows(), data_df.iterrows()):
+
+            middle = info_row.get("Middle Name", "")
+            print(type(middle))
+            if isinstance(middle, str) and middle.strip():
+                middle_initial = f"{middle.strip()[0]}."
+            else:
+                middle_initial = ""
+            # middle_initial = (
+            #    f"{str(middle).strip()[0]}." if middle and middle.strip() else ""
+            # )
+
+            if middle_initial == "":
+                name = (
+                    f"{info_row.get('First Name', '')} {info_row.get('Last Name', '')}"
+                )
+            else:
+                name = f"{info_row.get('First Name', '')} {middle_initial} {info_row.get('Last Name', '')}"
+
+            # self.tree.insert(
+            #    "",
+            #    "end",
+            #    values=(pid, name.strip(), row.get("Phone", ""), row.get("Email", "")),
+            # )
+            gender = data_row.get("gender", "")
+            DOB = data_row.get("dob", "")
+
+            # Since phone humber is a Float per the DF
+
+            if info_row.get("Phone") and str(info_row.get("Phone")).strip():
+                phone_number = str(info_row.get("Phone")).strip()[0:10]
+                phone_string = (
+                    f"({phone_number[:3]}) {phone_number[3:6]}-{phone_number[6:]}"
+                )
+            else:
+                phone_string = "-"
+
+            self.tree.insert(
+                "",
+                "end",
+                values=(
+                    name.strip(),
+                    gender,
+                    DOB,
+                    phone_string,
+                    (
+                        info_row.get("Email")
+                        if info_row.get("Email") and str(info_row.get("Email")).strip()
+                        else "-" if isinstance(info_row.get("Email"), str) else "-"
+                    ),
+                ),
+            )
+
+    def delete_selected(self):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning("No Selection", "Please select a patient to delete.")
+            return
+
+        confirm = messagebox.askyesno(
+            "Confirm Delete", "Are you sure you want to delete the selected patient(s)?"
+        )
         if not confirm:
             return
 
-        selected_values = self.tree.item(selected_item)["values"]
-        patient_id = selected_values[0]
+        ids_to_delete = [self.tree.item(item)["values"][0] for item in selected]
 
-        df = load_patient_dataframe()
-        df = df[df["Patient_ID"] != patient_id]
-        save_patient_dataframe(df)
+        info_df, data_df = load_patient_dataframe()
+        info_df = info_df[~info_df["Patient_ID"].isin(ids_to_delete)]
+        data_df = data_df[~data_df["Patient_ID"].isin(ids_to_delete)]
 
-        self.tree.delete(selected_item)
+        save_patient_dataframe(info_df, data_df)
+        self.populate_treeview()

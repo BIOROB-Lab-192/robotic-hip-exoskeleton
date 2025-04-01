@@ -31,6 +31,8 @@ class App(tk.Tk):
         frame = self.frames[page_name]
         if hasattr(frame, "load_patients"):
             frame.load_patients()
+        if hasattr(frame, "on_show"):
+            frame.on_show()
         frame.tkraise()
 
 
