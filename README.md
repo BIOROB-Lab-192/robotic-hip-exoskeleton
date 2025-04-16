@@ -1,6 +1,12 @@
 # exoskeleton-prosthetic
 ### Exoskeleton prosthetic for  BME 198 Senior Design Project With User Interface
 
+## Description
+
+Desktop application to support data collection for hip exoskeleton research. 
+The app handles device connections, and real-time logging of IMU sensor data. Built with a user-friendly interface to streamline experimental trials, it lays the groundwork for future integration of EMG data to support adaptive control algorithms.
+
+
 
 ## Files
 kqExoskeletonIO: Device communication protocol file
