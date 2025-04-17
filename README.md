@@ -1,4 +1,4 @@
-# roboti-hip-prosthetic
+# roboti-hip-exoskeleton
 ### Exoskeleton prosthetic for  BME 198 Senior Design Project With User Interface
 
 ## Description
