@@ -4,6 +4,7 @@ from ui_main_menu import MainMenu
 from patient_add import AddPatientPage
 from ui_collect import CollectDataPage
 from patient_view import ViewPatientsPage
+from patient_edit import EditPatientPage
 
 
 class App(tk.Tk):
@@ -17,6 +18,7 @@ class App(tk.Tk):
         container.pack(fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
+        self.container = container
 
         self.frames = {}
         for F in (MainMenu, AddPatientPage, CollectDataPage, ViewPatientsPage):

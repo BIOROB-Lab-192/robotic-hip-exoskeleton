@@ -81,5 +81,3 @@ if __name__ == "__main__":
     columns_to_extract = ["Time", "HipTor_L"]
     with open("data/Collin_treadwalk_2_AntData_2025_03_06_15_41.csv", "r") as file:
         reader = csv.DictReader(file)
-
-        # generate_parameters_from_sine(x_data, y_data)
