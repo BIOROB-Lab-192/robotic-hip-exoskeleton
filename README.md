@@ -1,4 +1,4 @@
-# robotic-hip-exoskeleton-data-pipeline
+# robotic-hip-exoskeleton-data-collection-pipeline
 
 
 ### Exoskeleton for  BME 198 Senior Design Project With User Interface
